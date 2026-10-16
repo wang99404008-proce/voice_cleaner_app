@@ -34,7 +34,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # macOS: GitHub runner 預設已內建 ffmpeg，若無則用 brew 安裝，並複製到當前目錄供打包
       - name: Setup & Copy FFmpeg (macOS)
         if: runner.os == 'macOS'
         run: |
@@ -44,7 +43,6 @@ jobs:
           cp $(which ffmpeg) ./ffmpeg
           chmod +x ./ffmpeg
 
-      # Windows: GitHub runner 內建 choco，直接安裝並複製 ffmpeg.exe 到當前目錄
       - name: Setup & Copy FFmpeg (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
