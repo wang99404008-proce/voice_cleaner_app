@@ -1,5 +1,15 @@
-import os
 import sys
+# === 相容性 Patch: 解決新版 torchaudio 缺少 backend 子模組問題 ===
+try:
+    import torchaudio
+    if not hasattr(torchaudio, "backend"):
+        torchaudio.backend = torchaudio
+        sys.modules["torchaudio.backend"] = torchaudio
+except ImportError:
+    pass
+# =========================================================
+
+import os
 import shutil
 import threading
 import subprocess
