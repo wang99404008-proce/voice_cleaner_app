@@ -5,4 +5,5 @@ pedalboard>=0.8.0
 soundfile>=0.12.0
 numpy
 torch
+torchaudio
 pyinstaller
