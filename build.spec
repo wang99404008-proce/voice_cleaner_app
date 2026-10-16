@@ -8,11 +8,9 @@ block_cipher = None
 # 自動收集靜態資源與模型配置
 datas = (
     collect_data_files('customtkinter') +
-    collect_data_files('df') +
-    collect_data_files('torchaudio')
+    collect_data_files('df')
 )
 
-# 確保所有深層隱含依賴完整引入
 hiddenimports = [
     'df',
     'pedalboard',
@@ -21,11 +19,8 @@ hiddenimports = [
     'soundfile',
     'numpy',
     'torch',
-    'torchaudio',
-    'torchaudio.backend',
-    'torchaudio.backend.soundfile_backend',
-    'torchaudio.backend.sox_io_backend',
-] + collect_submodules('df') + collect_submodules('torchaudio')
+    'torchaudio'
+] + collect_submodules('df')
 
 a = Analysis(
     ['app.py'],
