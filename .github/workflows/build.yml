@@ -34,24 +34,24 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # 使用官方維護的 action 安裝穩定版 FFmpeg
-      - name: Setup FFmpeg
-        uses: Federik/setup-ffmpeg@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      # 將 runner 安裝好的 ffmpeg 複製到當前工作目錄，供 PyInstaller 打包
-      - name: Copy FFmpeg binary for packaging (Windows)
-        if: runner.os == 'Windows'
-        shell: bash
-        run: |
-          cp $(which ffmpeg) ./ffmpeg.exe
-
-      - name: Copy FFmpeg binary for packaging (macOS)
+      # macOS: GitHub runner 預設已內建 ffmpeg，若無則用 brew 安裝，並複製到當前目錄供打包
+      - name: Setup & Copy FFmpeg (macOS)
         if: runner.os == 'macOS'
         run: |
+          if ! command -v ffmpeg &> /dev/null; then
+            brew install ffmpeg
+          fi
           cp $(which ffmpeg) ./ffmpeg
           chmod +x ./ffmpeg
+
+      # Windows: GitHub runner 內建 choco，直接安裝並複製 ffmpeg.exe 到當前目錄
+      - name: Setup & Copy FFmpeg (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          choco install ffmpeg --confirm
+          $ffmpegPath = (Get-Command ffmpeg).Source
+          Copy-Item $ffmpegPath -Destination ./ffmpeg.exe
 
       - name: Build with PyInstaller
         run: |
