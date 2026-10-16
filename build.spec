@@ -8,7 +8,7 @@ block_cipher = None
 # 自動收集 customtkinter 與 deepfilternet 所需的靜態資源檔
 datas = collect_data_files('customtkinter') + collect_data_files('df')
 
-# 確保所有深層隱含的依賴模組都被正確引入
+# 確保所有深層隱含的依賴模組都被正確引入 (加入 torchaudio)
 hiddenimports = [
     'df',
     'pedalboard',
@@ -16,7 +16,8 @@ hiddenimports = [
     'tkinterdnd2',
     'soundfile',
     'numpy',
-    'torch'
+    'torch',
+    'torchaudio'
 ] + collect_submodules('df')
 
 a = Analysis(
@@ -46,12 +47,12 @@ exe = EXE(
     [],
     name='VoiceClarityStudio',
     debug=False,
-    bootloader_ignore_signals=False,
+    bootloader_ignoresignals=False,
     strip=False,
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=False,                  # 設為 False 避免啟動時跳出黑色終端機命令視窗
+    console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
