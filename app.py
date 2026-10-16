@@ -19,23 +19,28 @@ except ImportError:
 from df.enhance import enhance, init_df, load_audio, save_audio
 from pedalboard import Pedalboard, HighpassFilter, Compressor, PeakFilter
 
-def get_ffmpeg_path():
-    """尋找與本程式同目錄下的獨立 ffmpeg.exe，找不到則 fallback 到系統 PATH"""
-    if getattr(sys, 'frozen', False):
-        # PyInstaller 打包成 exe 時，取得 exe 所在的真實資料夾路徑
-        base_dir = os.path.dirname(sys.executable)
-    else:
-        # 開發環境下，取得目前 py 檔所在目錄
-        base_dir = os.path.dirname(os.path.abspath(__file__))
+def _start_processing(self):
+        if not self.input_file or not self.processor:
+            return
 
-    # 1. 優先檢查同目錄是否有 ffmpeg.exe
-    local_ffmpeg = os.path.join(base_dir, "ffmpeg.exe")
-    if os.path.exists(local_ffmpeg):
-        return local_ffmpeg
+        # 檢查 ffmpeg.exe 是否已放入同目錄
+        current_ffmpeg = get_ffmpeg_path()
+        if not current_ffmpeg:
+            messagebox.showerror(
+                "缺少 FFmpeg 核心",
+                "找不到 ffmpeg.exe！\n\n請將 ffmpeg.exe 下載並放置在與本程式（VoiceClarityStudio.exe）相同的資料夾內，然後重試。"
+            )
+            return
 
-    # 2. 備用：檢查系統環境變數中的 ffmpeg
-    return shutil.which("ffmpeg") or "ffmpeg"
-
+        base, ext = os.path.splitext(self.input_file)
+        default_out = f"{base}_enhanced{ext}"
+        output_path = filedialog.asksaveasfilename(
+            initialfile=os.path.basename(default_out),
+            defaultextension=ext,
+            title="儲存清晰化後的檔案"
+        )
+        if not output_path:
+            return
 FFMPEG_BIN = get_ffmpeg_path()
 
 # 設定深色主題風格
