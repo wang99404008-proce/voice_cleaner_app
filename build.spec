@@ -5,18 +5,19 @@ from PyInstaller.utils.hooks import collect_data_files
 
 block_cipher = None
 
+# 自動收集 customtkinter 與 deepfilternet 的配置資料
 datas = collect_data_files('customtkinter') + collect_data_files('df')
 
-ffmpeg_bin = "ffmpeg.exe" if sys.platform.startswith("win") else "ffmpeg"
-if os.path.exists(ffmpeg_bin):
-    datas.append((ffmpeg_bin, '.'))
+# 確保抓取到同目錄的 ffmpeg.exe
+if os.path.exists("ffmpeg.exe"):
+    datas.append(('ffmpeg.exe', '.'))
 
 a = Analysis(
     ['app.py'],
     pathex=[],
     binaries=[],
     datas=datas,
-    hiddenimports=['df', 'pedalboard', 'customtkinter'],
+    hiddenimports=['df', 'pedalboard', 'customtkinter', 'tkinterdnd2'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
