@@ -5,10 +5,14 @@ from PyInstaller.utils.hooks import collect_data_files, collect_submodules
 
 block_cipher = None
 
-# 自動收集 customtkinter 與 deepfilternet 所需的靜態資源檔
-datas = collect_data_files('customtkinter') + collect_data_files('df')
+# 自動收集靜態資源與模型配置
+datas = (
+    collect_data_files('customtkinter') +
+    collect_data_files('df') +
+    collect_data_files('torchaudio')
+)
 
-# 確保所有深層隱含的依賴模組都被正確引入 (加入 torchaudio)
+# 確保所有深層隱含依賴完整引入
 hiddenimports = [
     'df',
     'pedalboard',
@@ -17,8 +21,11 @@ hiddenimports = [
     'soundfile',
     'numpy',
     'torch',
-    'torchaudio'
-] + collect_submodules('df')
+    'torchaudio',
+    'torchaudio.backend',
+    'torchaudio.backend.soundfile_backend',
+    'torchaudio.backend.sox_io_backend',
+] + collect_submodules('df') + collect_submodules('torchaudio')
 
 a = Analysis(
     ['app.py'],
@@ -47,7 +54,7 @@ exe = EXE(
     [],
     name='VoiceClarityStudio',
     debug=False,
-    bootloader_ignoresignals=False,
+    bootloader_ignore_signals=False,
     strip=False,
     upx=True,
     upx_exclude=[],
