@@ -16,7 +16,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -27,28 +27,43 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Setup & Copy FFmpeg
+      - name: Prepare FFmpeg Binary
         shell: pwsh
         run: |
-          choco install ffmpeg --confirm
-          $ffmpegPath = (Get-Command ffmpeg).Source
-          Copy-Item $ffmpegPath -Destination ./ffmpeg.exe
-          Write-Host "FFmpeg binary prepared at ./ffmpeg.exe"
+          # 檢查倉庫內是否已存在 ffmpeg.exe，若無則透過 choco 下載
+          if (Test-Path "./ffmpeg.exe") {
+            Write-Host "Found existing ffmpeg.exe in repository root."
+          } else {
+            Write-Host "ffmpeg.exe not found in repo. Installing via Chocolatey..."
+            choco install ffmpeg --confirm
+            $ffmpegPath = (Get-Command ffmpeg).Source
+            Copy-Item $ffmpegPath -Destination ./ffmpeg.exe
+            Write-Host "FFmpeg successfully copied to root."
+          }
 
       - name: Build with PyInstaller
         run: |
           pyinstaller --clean build.spec
 
-      - name: Package Windows Artifact
+      - name: Package Release Folder (Standalone Exe + FFmpeg)
         shell: pwsh
         run: |
-          # 檢查檔案是否存在
-          if (Test-Path "dist/VoiceClarityStudio.exe") {
-            Compress-Archive -Path dist/VoiceClarityStudio.exe -DestinationPath VoiceClarityStudio-Windows.zip
-          } else {
-            Write-Error "dist/VoiceClarityStudio.exe not found!"
+          # 建立目標資料夾結構
+          New-Item -ItemType Directory -Force -Path ./release/VoiceClarityStudio
+
+          # 檢查主程式生成狀態
+          if (-not (Test-Path "dist/VoiceClarityStudio.exe")) {
+            Write-Error "dist/VoiceClarityStudio.exe was not created!"
             exit 1
           }
+
+          # 將主程式與獨立的 ffmpeg.exe 複製進同一資料夾
+          Copy-Item dist/VoiceClarityStudio.exe -Destination ./release/VoiceClarityStudio/
+          Copy-Item ./ffmpeg.exe -Destination ./release/VoiceClarityStudio/
+
+          # 壓縮整個資料夾供使用者下載
+          Compress-Archive -Path ./release/VoiceClarityStudio -DestinationPath VoiceClarityStudio-Windows.zip
+          Write-Host "Successfully packaged VoiceClarityStudio-Windows.zip"
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
