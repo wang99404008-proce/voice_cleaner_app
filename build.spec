@@ -5,10 +5,8 @@ from PyInstaller.utils.hooks import collect_data_files
 
 block_cipher = None
 
-# 自動收集 customtkinter 與 deepfilternet 資料檔
 datas = collect_data_files('customtkinter') + collect_data_files('df')
 
-# 若本機/Runner 當前目錄有 ffmpeg，一併打入 root
 ffmpeg_bin = "ffmpeg.exe" if sys.platform.startswith("win") else "ffmpeg"
 if os.path.exists(ffmpeg_bin):
     datas.append((ffmpeg_bin, '.'))
@@ -44,7 +42,7 @@ exe = EXE(
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=False,  # 不顯示黑底終端機視窗
+    console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
